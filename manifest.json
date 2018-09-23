@@ -3,5 +3,7 @@
   "short_name": "Zub's Private Chat Room",
   "start_url": "/index.html",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "orientation": "portrait",
+  "gcm_sender_id": "103953800507"
 }
