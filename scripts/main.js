@@ -80,15 +80,16 @@ function isUserSignedIn() {
 function loadMessages() {
   // TODO 7: Load and listens for new messages.
   // Loads the last 12 messages and listen for new ones.
+
   var updateUI = function(snapshot) {
     var data = snapshot.val();
-    // console.log('data returned by db listener is:  ', data)
     displayMessage(snapshot.key, data.name, data.message, data.profilePicUrl, data.imageUrl);
   };
 
   // load real time LISTENERS
   firebase.database().ref('chatapp/messages/').limitToLast(12).on('child_added', updateUI);
   firebase.database().ref('chatapp/messages/').limitToLast(12).on('child_changed', updateUI);
+
 }
 
 // Saves a new message on the Firebase DB.
@@ -245,7 +246,7 @@ function checkSignedInWithMessage() {
 
   //else - Display a message to the user using a Toast.
   var data = {
-    message: 'You must sign-in first',
+    message: 'To see messages, or send any, you must first sign in',
     timeout: 2000
   };
   signInSnackbarElement.MaterialSnackbar.showSnackbar(data);
@@ -270,6 +271,7 @@ var MESSAGE_TEMPLATE =
 var LOADING_IMAGE_URL = 'https://www.google.com/images/spin-32.gif?a';
 
 // Displays a Message in the UI.
+
 function displayMessage(key, name, text, picUrl, imageUrl) {
   var div = document.getElementById(key);
   // If an element for that message does not exists yet we create it.

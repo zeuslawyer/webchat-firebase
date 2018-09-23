@@ -14,12 +14,36 @@
  * limitations under the License.
  */
 
-// Note: You will edit this file in the follow up codelab about the Cloud Functions for Firebase.
-
 // TODO(DEVELOPER): Import the Cloud Functions for Firebase and the Firebase Admin modules here.
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+
+admin.initializeApp();
+
+ // helper - data and time string
+ function getLocalDateAndTime() {
+    return new Date().toLocaleString('en-GB', { timeZone: 'Australia/Melbourne' })
+  }
 
 // TODO(DEVELOPER): Write the addWelcomeMessages Function here.
+exports.addWelcomeMessages = functions.auth.user().onCreate(async (user) => {
+    const fullName = user.displayName || 'New Friend';
+    console.log( fullName + ' signed in for the first time - at - ' + getLocalDateAndTime() );
+
+    // Saves the new welcome message into the database
+    // which then displays it in the FriendlyChat clients.
+    await admin.database().ref('chatapp/messages').push({
+      name: 'Admin',
+      profilePicUrl: '/images/firebase-logo.png', // Firebase logo
+      message: `Hi,  ${fullName}! Welcome!`,
+      timestamp: getLocalDateAndTime()
+    });
+    console.log('Welcome message to ' + fullName + ' written to database.');
+  });
+  
 
 // TODO(DEVELOPER): Write the blurOffensiveImages Function here.
 
 // TODO(DEVELOPER): Write the sendNotifications Function here.
+
+// (OPTIONAL) TODO(DEVELOPER): Write the annotateMessages Function here.
