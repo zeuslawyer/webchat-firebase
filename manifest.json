@@ -1,0 +1,7 @@
+{
+  "name": "Zubin's Private Chat Room",
+  "short_name": "Zub's Private Chat Room",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "portrait"
+}
