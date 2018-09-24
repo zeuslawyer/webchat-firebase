@@ -136,7 +136,7 @@ function saveImageMessage(file) {
     });
 }
 
-// Saves the messaging device token to the datastore.
+// Saves the messaging device token to the datastore - needed for browser Firebase Cloud Messaging/ notifications.
 function saveMessagingDeviceToken() {
   // TODO 10: Save the device token in the realtime datastore
   firebase.messaging().getToken()

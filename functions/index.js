@@ -45,5 +45,53 @@ exports.addWelcomeMessages = functions.auth.user().onCreate(async (user) => {
 // TODO(DEVELOPER): Write the blurOffensiveImages Function here.
 
 // TODO(DEVELOPER): Write the sendNotifications Function here.
+exports.sendNotifications = functions.database.ref('chatapp/messages/{messageId}').onCreate(
+  async (snapshot, eventContext) => {
+    // console.log('event context is :  ' + eventContext)
+    // console.log('snapshot val is :  ' + snapshot.val())
+    // console.log('GCLOUD project is :  ' + process.env.GCLOUD_PROJECT)
+    // console.log('MessageID Param is  :  ' + eventContext.params)
+    
+    // Notification details.
+    const text = snapshot.val().text;
+    const payload = {
+      notification: {
+        title: `${snapshot.val().name} posted ${text ? 'a message' : 'an image'}`,
+        body: text ? (text.length <= 100 ? text : text.substring(0, 97) + '...') : '',
+        icon: snapshot.val().photoUrl || '/images/profile_placeholder.png',
+        click_action: `https://${process.env.GCLOUD_PROJECT}.firebaseapp.com`,
+      }
+    };
+
+    // Get the list of device tokens.
+    const allTokens = await admin.database().ref('chatapp/fcmTokens').once('value');
+    if (allTokens.exists()) {
+       // Listing all device tokens to send a notification to.
+      console.dir('the all Tokens Snapshot is :  ' + allTokens.val())
+      const tokens = Object.keys(allTokens.val());
+
+      // Send notifications to all tokens.
+      const response = await admin.messaging().sendToDevice(tokens, payload);
+      await cleanupTokens(response, tokens);
+      console.log('Notifications have been sent and tokens cleaned up.');
+    }
+  });
+
+  function cleanupTokens(response, tokens) {
+    // For each notification we check if there was an error.
+    const tokensToRemove = {};
+    response.results.forEach((result, index) => {
+      const error = result.error;
+      if (error) {
+        console.error('Failure sending notification to', tokens[index], error);
+        // Cleanup the tokens who are not registered anymore.
+        if (error.code === 'messaging/invalid-registration-token' ||
+            error.code === 'messaging/registration-token-not-registered') {
+          tokensToRemove[`/chatapp/fcmTokens/${tokens[index]}`] = null;
+        }
+      }
+    });
+    return admin.database().ref().update(tokensToRemove);
+   }
 
 // (OPTIONAL) TODO(DEVELOPER): Write the annotateMessages Function here.
